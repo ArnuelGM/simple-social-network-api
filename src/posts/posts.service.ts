@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entities/post';
 import { Repository } from 'typeorm';
@@ -13,26 +17,26 @@ export class PostsService {
     private postRepository: Repository<Post>,
   ) {}
 
+  async getById(id: string) {
+    return await this.postRepository.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        user: true,
+      },
+    });
+  }
+
   async feed() {
-    const [data] = await this.postRepository.findAndCount({
+    const data = await this.postRepository.find({
       order: {
         createdAt: 'DESC',
       },
       relations: { user: true },
-      /* skip,
-      take */
     });
 
-    return {
-      data,
-      /* meta: {
-        page: page,
-        perPage: perPage,
-        total,
-        count: data.length,
-        totalPages: Math.ceil(total / perPage),
-      }, */
-    };
+    return data;
   }
 
   search() {}
@@ -42,10 +46,34 @@ export class PostsService {
     Object.assign(post, postDto);
     post.user = req['user'] as User;
     const registeredPost = await this.postRepository.save(post);
+    delete registeredPost.user.password;
     return registeredPost;
   }
 
-  update() {}
+  async update(id: string, user: User, postDto: PostDto) {
+    const post = await this.getById(id);
+    if (!post) {
+      throw new NotFoundException('Post not found.');
+    }
+    if (post.user.id !== user.id) {
+      throw new UnauthorizedException('Not allowed.');
+    }
+    Object.assign(post, postDto);
+    await this.postRepository.save(post);
+    delete post.user;
+    return post;
+  }
 
-  delete() {}
+  async delete(id: string, user: User) {
+    const post = await this.getById(id);
+    if (!post) {
+      throw new NotFoundException('Post not found.');
+    }
+    if (post.user.id !== user.id) {
+      throw new UnauthorizedException('Not allowed.');
+    }
+    await this.postRepository.softDelete(id);
+    delete post.user;
+    return post;
+  }
 }

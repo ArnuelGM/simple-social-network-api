@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Post,
   Put,
   Req,
@@ -14,6 +15,7 @@ import { PostDto } from './dto/post.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { UserInterceptor } from 'src/user/user.interceptor';
+import { User } from 'src/user/entities/user';
 
 @Controller('post')
 export class PostsController {
@@ -34,9 +36,17 @@ export class PostsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Put('/:id')
-  updatePost() {}
+  updatePost(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() postDto: PostDto,
+  ) {
+    return this.postsService.update(id, req['user'] as User, postDto);
+  }
 
   @UseGuards(AuthGuard('jwt'))
   @Delete('/:id')
-  deletePost() {}
+  deletePost(@Req() req: Request, @Param('id') id: string) {
+    return this.postsService.delete(id, req['user'] as User);
+  }
 }
