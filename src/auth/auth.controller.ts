@@ -28,6 +28,9 @@ export class AuthController {
     return { ok: true };
   }
 
-  @Get('/refresh')
-  refresToken() { }
+  @UseGuards(AuthGuard('refresh-jwt'))
+  @Post('/refresh')
+  refresToken(@Req() req: Request) {
+    return this.authService.login(req['user'] as User);
+  }
 }
