@@ -1,8 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { User } from './entities/user';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserDto } from './dto/user.dto';
+import { UpdateUserDto } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -15,18 +15,18 @@ export class UserService {
     return await this.userRepository.findOneBy({ email });
   }
 
-  async updateProfile(user: User, userData: UserDto) {
-    const { password, passwordConfirmation } = userData;
-
-    if (password && !passwordConfirmation) {
-      throw new UnauthorizedException('Passsword most be confirmed.');
-    }
-
-    if (password && passwordConfirmation && password !== passwordConfirmation) {
-      throw new UnauthorizedException('Passswords most be equals.');
+  async updateProfile(user: User, userData: UpdateUserDto) {
+    if (!(await user.validatePassword(userData.currentPassword))) {
+      throw new UnauthorizedException('Invalid current password.');
     }
 
     Object.assign(user, userData);
+
+    const { password, passwordConfirmation } = userData;
+    if (password && passwordConfirmation && password === passwordConfirmation) {
+      user.password = await user.createPassword(userData.password);
+    }
+
     return await this.userRepository.save(user);
   }
 

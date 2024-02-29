@@ -1,3 +1,4 @@
+import * as bcrypt from 'bcrypt';
 import { Post } from 'src/posts/entities/post';
 import {
   Column,
@@ -39,4 +40,12 @@ export class User {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  async createPassword(password: string) {
+    return await bcrypt.hash(password, 10);
+  }
+
+  async validatePassword(password: string) {
+    return await bcrypt.compare(password, this.password);
+  }
 }
