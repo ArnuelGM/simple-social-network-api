@@ -4,7 +4,7 @@ import { User } from './entities/user';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { UserInterceptor } from './user.interceptor';
+import { RemovePasswordInterceptor } from './remove-password.interceptor';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
@@ -13,7 +13,7 @@ import { UserInterceptor } from './user.interceptor';
     UserService,
     {
       provide: APP_INTERCEPTOR,
-      useClass: UserInterceptor,
+      useClass: RemovePasswordInterceptor,
     },
   ],
   exports: [UserService],

@@ -46,7 +46,6 @@ export class PostsService {
     Object.assign(post, postDto);
     post.user = req['user'] as User;
     const registeredPost = await this.postRepository.save(post);
-    delete registeredPost.user.password;
     return registeredPost;
   }
 
