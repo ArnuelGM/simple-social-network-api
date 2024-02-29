@@ -4,10 +4,12 @@ import {
   Controller,
   Get,
   Post,
+  Req,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { UserDto } from 'src/user/dto/user.dto';
-import { LoginDto } from './dto/login.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -26,9 +28,10 @@ export class AuthController {
     return { ok: true };
   }
 
+  @UseGuards(AuthGuard('local'))
   @Post('/login')
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(@Req() req: Request) {
+    return this.authService.login(req['user']);
   }
 
   @Post('/logout')

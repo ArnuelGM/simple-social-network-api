@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UserModule } from 'src/user/user.module';
+import { LocalStrategy } from './local.strategy';
 
 @Module({
   imports: [
@@ -18,8 +20,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         signOptions: { expiresIn: '1y' },
       }),
     }),
+    UserModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, LocalStrategy],
 })
 export class AuthModule {}
