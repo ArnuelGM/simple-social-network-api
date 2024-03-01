@@ -1,26 +1,18 @@
+import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { MailService } from 'src/mail/mail.service';
+import { Queue } from 'bull';
 import { User } from 'src/user/entities/user';
 
 @Injectable()
 export class AuthListener {
-  constructor(private mailService: MailService) {}
+  constructor(
+    @InjectQueue('mail')
+    private readonly mailQueue: Queue,
+  ) {}
 
   @OnEvent('auth.registered')
   handleUserRegistered(user: User) {
-    try {
-      this.mailService.sendMail(
-        user.email,
-        'Welcome to SocialNet',
-        `
-        Hello, ${user.fullName}
-        <br>
-        Welcome to <strong>SocialNet</strong>
-      `,
-      );
-    } catch (error) {
-      console.log('Error al enviar el correo:', error);
-    }
+    this.mailQueue.add('send-welcome-email', user);
   }
 }

@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DB_MODULE } from './database/database.config';
 import { MailModule } from './mail/mail.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { QUEUE_MODULE } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     PostsModule,
     MailModule,
     EventEmitterModule.forRoot(),
+    QUEUE_MODULE,
   ],
   // controllers: [AppController],
   //providers: [AppService],

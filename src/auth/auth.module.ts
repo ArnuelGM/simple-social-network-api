@@ -11,6 +11,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshJwtStrategy } from './strategies/refresh-jwt.strategy';
 import { MailModule } from 'src/mail/mail.module';
 import { AuthListener } from './listeners/auth.listener';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { AuthListener } from './listeners/auth.listener';
       }),
     }),
     MailModule,
+    BullModule.registerQueue({ name: 'mail' }),
     UserModule,
   ],
   controllers: [AuthController],
