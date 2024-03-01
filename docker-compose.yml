@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  socialnet_api:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis
+      - mailpit
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
