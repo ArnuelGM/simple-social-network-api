@@ -5,6 +5,7 @@ import { UserDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,8 @@ export class AuthService {
     private userRepository: Repository<User>,
     private jwtService: JwtService,
     private userService: UserService,
-  ) { }
+    private mailService: MailService,
+  ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.userService.findByEmail(email);
@@ -25,7 +27,6 @@ export class AuthService {
   }
 
   async register(userDto: UserDto) {
-
     const { password, passwordConfirmation } = userDto;
     if (password != passwordConfirmation) {
       throw new BadRequestException('Passwords must be equals.');
@@ -41,7 +42,21 @@ export class AuthService {
     Object.assign(user, userDto);
     user.password = await user.createPassword(userDto.password);
     const registeredUser = await this.userRepository.save(user);
-    // TODO: enqueue welcome email
+
+    try {
+      this.mailService.sendMail(
+        user.email,
+        'Welcome to SocialNet',
+        `
+        Hello, ${user.fullName}
+        <br>
+        Welcome to <strong>SocialNet</strong>
+      `,
+      );
+    } catch (error) {
+      console.log('Error al enviar el correo:', error);
+    }
+
     return registeredUser;
   }
 
