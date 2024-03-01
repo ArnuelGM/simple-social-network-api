@@ -1,5 +1,5 @@
 import { UserService } from './../user/user.service';
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user';
@@ -25,6 +25,11 @@ export class AuthService {
   }
 
   async register(userDto: UserDto) {
+
+    const { password, passwordConfirmation } = userDto;
+    if (password != passwordConfirmation) {
+      throw new BadRequestException('Passwords must be equals.');
+    }
 
     const { email } = userDto;
     const userExists = await this.userRepository.findOneBy({ email });

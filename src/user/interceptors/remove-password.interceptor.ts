@@ -20,9 +20,13 @@ export class RemovePasswordInterceptor implements NestInterceptor {
         }
         if (data?.user) {
           delete data.user.password;
+          delete data.user.currentPassword;
+          delete data.user.passwordConfirmation;
         }
         if (data?.password) {
           delete data.password;
+          delete data.currentPassword;
+          delete data.passwordConfirmation;
         }
         return data;
       }),

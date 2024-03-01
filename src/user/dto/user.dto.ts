@@ -22,13 +22,20 @@ export class UserDto {
   @MinLength(6)
   password: string;
 
-  @Equals('password')
   @IsNotEmpty()
   @IsString()
   passwordConfirmation: string;
 }
 
-export class UpdateUserDto extends UserDto {
+export class UpdateUserDto {
+  @IsString()
+  @IsNotEmpty()
+  fullName: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
   @IsNotEmpty()
   @IsString()
   @MinLength(6)
@@ -36,11 +43,11 @@ export class UpdateUserDto extends UserDto {
 
   @IsOptional()
   @IsNotEmpty()
-  @Equals('passwordConfirmation')
   @Length(6, undefined)
   password: string;
 
   @IsOptional()
-  @Equals('password')
+  @IsNotEmpty()
+  @IsString()
   passwordConfirmation: string;
 }
