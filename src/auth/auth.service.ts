@@ -1,11 +1,15 @@
 import { UserService } from './../user/user.service';
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { MailService } from 'src/mail/mail.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +18,7 @@ export class AuthService {
     private userRepository: Repository<User>,
     private jwtService: JwtService,
     private userService: UserService,
-    private mailService: MailService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
@@ -43,19 +47,8 @@ export class AuthService {
     user.password = await user.createPassword(userDto.password);
     const registeredUser = await this.userRepository.save(user);
 
-    try {
-      this.mailService.sendMail(
-        user.email,
-        'Welcome to SocialNet',
-        `
-        Hello, ${user.fullName}
-        <br>
-        Welcome to <strong>SocialNet</strong>
-      `,
-      );
-    } catch (error) {
-      console.log('Error al enviar el correo:', error);
-    }
+    // Emit event in order to send welcome email and more.
+    this.eventEmitter.emitAsync('auth.registered', user);
 
     return registeredUser;
   }

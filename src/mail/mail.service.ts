@@ -16,7 +16,6 @@ export class MailService {
         pass: configService.get('MAIL_PASSWORD'),
       },
     };
-    console.log({ options });
     this.transporter = createTransport(options);
   }
 
