@@ -5,17 +5,15 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  Generated,
   ManyToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
 export class Post {
   @ApiProperty()
-  @PrimaryColumn()
-  @Generated('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ApiProperty()

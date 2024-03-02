@@ -1,15 +1,20 @@
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-export const DB_MODULE = TypeOrmModule.forRoot({
-  type: 'sqlite',
-  database: './database.db',
-  /* type: 'postgres',
-  host: 'localhost',
-  port: 5432,
-  username: 'postgres',
-  password: '12345678abc',
-  database: 'socialnet', */
-  autoLoadEntities: true,
-  synchronize: true,
-  entities: [],
+export const DB_MODULE = TypeOrmModule.forRootAsync({
+  imports: [ConfigModule],
+  inject: [ConfigService],
+  useFactory: async (configService: ConfigService) => ({
+    type: 'postgres',
+    host: configService.get('POSTGRES_HOST'),
+    port: configService.get('POSTGRES_PORT'),
+    username: configService.get('POSTGRES_USER'),
+    password: configService.get('POSTGRES_PASSWORD'),
+    database: configService.get('POSTGRES_DB'),
+    autoLoadEntities: true,
+    synchronize: true,
+    entities: [],
+  }),
+  /* type: 'sqlite',
+  database: './database.db', */
 });

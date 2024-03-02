@@ -6,17 +6,15 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  Generated,
   OneToMany,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
 export class User {
   @ApiProperty()
-  @PrimaryColumn()
-  @Generated('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ApiProperty({ description: 'Full name of user' })

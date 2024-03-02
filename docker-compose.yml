@@ -1,19 +1,41 @@
 version: '3'
 
 services:
+
+  # User Interface - Vuejs
+  socialnet_ui:
+    build: ./ui
+    image: socialnet_ui
+    ports:
+      - "80:5173"
+
+  # Socialnet API - NestJS
   socialnet_api:
     build: .
+    image: socialnet_api
     ports:
       - "3000:3000"
     depends_on:
       - redis
       - mailpit
+      - postgres
 
+  # Redis for QUEUES
   redis:
     image: redis:latest
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
 
+  postgres:
+    image: postgres:bullseye
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+  # Mailpit for send (port: 1025) emails and visualize it (port: 8025)
   mailpit:
     image: axllent/mailpit:latest
     ports:

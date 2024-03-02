@@ -14,19 +14,26 @@ Asegúrate de tener instalado Docker y Docker Compose en tu sistema.
 1. Clona este repositorio en tu máquina local:
 
 ```bash
-git clone https://github.com/ArnuelGM/social-net.git
+git clone https://github.com/ArnuelGM/socialnet-api.git
 ```
 
 2. Accede al directorio del proyecto:
 
 ```bash
-cd social-net
+cd socialnet-api
 ```
 
-3. Inicia los servicios utilizando Docker Compose:
+3. Compilar la imagen de docker del proyecto y descargar las imagenes de los demas servicios.
 
 ```bash
-docker-compose up
+docker-compose build
+docker-compose pull
+```
+
+4. Inicia los servicios utilizando Docker Compose:
+
+```bash
+docker-compose up -d
 ```
 
 Esto creará e iniciará los contenedores de la aplicación.
