@@ -1,5 +1,5 @@
 import { AuthService } from './auth.service';
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { UserDto } from 'src/user/dto/user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
@@ -9,7 +9,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService) {}
 
   @Post('/register')
   async register(@Body() userDto: UserDto) {
@@ -26,8 +26,8 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Post('/logout')
-  logout() {
-    // NOTHING TO DO, BECAUSE TOKEN IS SAVED IN CLIENT
+  async logout(@Req() req: Request) {
+    await this.authService.logout(req.headers.authorization.split(' ')[1]);
     return { ok: true };
   }
 

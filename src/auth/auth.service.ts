@@ -10,12 +10,21 @@ import { User } from 'src/user/entities/user';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { AccessToken } from './entities/AccessToken.entity';
+import { RefreshToken } from './entities/RefreshToken.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+
+    @InjectRepository(AccessToken)
+    private accessTokenRepository: Repository<AccessToken>,
+
+    @InjectRepository(RefreshToken)
+    private refreshTokenRepository: Repository<RefreshToken>,
+
     private jwtService: JwtService,
     private userService: UserService,
     private eventEmitter: EventEmitter2,
@@ -54,9 +63,82 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload = { email: user.email, sub: user.id };
-    const access_token = this.jwtService.sign(payload);
-    const refresh_token = this.jwtService.sign(payload, { expiresIn: '7d' });
+    const { access_token, refresh_token } = await this.createTokens(user);
     return { access_token, refresh_token };
+  }
+
+  async logout(token: string) {
+    const data = this.jwtService.decode(token);
+    const { tokenId } = data;
+    const accessToken = await this.getAccessToken(tokenId);
+    await this.revokeTokens(accessToken);
+  }
+
+  async getAccessToken(tokenId: string) {
+    return await this.accessTokenRepository.findOne({
+      where: {
+        id: tokenId,
+      },
+      relations: {
+        refreshToken: true,
+      },
+    });
+  }
+
+  async getRefreshToken(tokenId: string) {
+    return await this.refreshTokenRepository.findOne({
+      where: {
+        id: tokenId,
+      },
+      relations: {
+        accessToken: true,
+      },
+    });
+  }
+
+  async createTokens(user: User) {
+    const token = await this.accessTokenRepository.save(
+      new AccessToken({
+        revoked: false,
+        userId: user.id,
+      }),
+    );
+    const refreshToken = await this.refreshTokenRepository.save(
+      new RefreshToken({
+        revoked: false,
+        userId: user.id,
+        accessToken: token,
+      }),
+    );
+
+    const payload = { email: user.email, sub: user.id, tokenId: token.id };
+    const access_token = this.jwtService.sign(payload);
+    const refresh_token = this.jwtService.sign(
+      {
+        ...payload,
+        refreshTokenId: refreshToken.id,
+        tokenId: undefined,
+      },
+      { expiresIn: '7d' },
+    );
+
+    return {
+      access_token,
+      refresh_token,
+    };
+  }
+
+  async revokeTokens(accessToken: AccessToken) {
+    const refreshToken = await this.getRefreshToken(
+      accessToken.refreshToken.id,
+    );
+
+    accessToken.revoked = true;
+    refreshToken.revoked = true;
+
+    await Promise.allSettled([
+      await this.accessTokenRepository.save(accessToken),
+      await this.refreshTokenRepository.save(refreshToken),
+    ]);
   }
 }

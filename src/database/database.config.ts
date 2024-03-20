@@ -13,6 +13,7 @@ export const DB_MODULE = TypeOrmModule.forRootAsync({
     database: configService.get('POSTGRES_DB'),
     autoLoadEntities: true,
     synchronize: true,
+    //dropSchema: true,
     entities: [],
   }),
   /* type: 'sqlite',

@@ -12,10 +12,12 @@ import { RefreshJwtStrategy } from './strategies/refresh-jwt.strategy';
 import { MailModule } from 'src/mail/mail.module';
 import { AuthListener } from './listeners/auth.listener';
 import { BullModule } from '@nestjs/bull';
+import { AccessToken } from './entities/AccessToken.entity';
+import { RefreshToken } from './entities/RefreshToken.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, AccessToken, RefreshToken]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
