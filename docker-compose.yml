@@ -2,17 +2,12 @@ version: '3'
 
 services:
 
-  # User Interface - Vuejs
-  socialnet_ui:
-    build: ./ui
-    image: socialnet_ui
-    ports:
-      - "80:5173"
-
   # Socialnet API - NestJS
   socialnet_api:
     build: .
     image: socialnet_api
+    env_file:
+      - ./.env.dev
     ports:
       - "3000:3000"
     depends_on:
